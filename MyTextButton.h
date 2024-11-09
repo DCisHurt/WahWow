@@ -2,8 +2,6 @@
 
 #include <JuceHeader.h>
 
-
-
 class MyTextButton : public TextButton
 {
 public:
@@ -19,5 +17,4 @@ public:
     {
         this->setClickingTogglesState(true);
     }
-
 };

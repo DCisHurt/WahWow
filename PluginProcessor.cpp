@@ -3,16 +3,15 @@
 
 //==============================================================================
 WahWowAudioProcessor::WahWowAudioProcessor()
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
-                     #endif
-                       )
+    : AudioProcessor(BusesProperties()
+#if !JucePlugin_IsMidiEffect
+#if !JucePlugin_IsSynth
+                         .withInput("Input", AudioChannelSet::stereo(), true)
+#endif
+                         .withOutput("Output", AudioChannelSet::stereo(), true)
+#endif
+      )
 {
-
 }
 
 WahWowAudioProcessor::~WahWowAudioProcessor()
@@ -27,29 +26,29 @@ const String WahWowAudioProcessor::getName() const
 
 bool WahWowAudioProcessor::acceptsMidi() const
 {
-   #if JucePlugin_WantsMidiInput
+#if JucePlugin_WantsMidiInput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool WahWowAudioProcessor::producesMidi() const
 {
-   #if JucePlugin_ProducesMidiOutput
+#if JucePlugin_ProducesMidiOutput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool WahWowAudioProcessor::isMidiEffect() const
 {
-   #if JucePlugin_IsMidiEffect
+#if JucePlugin_IsMidiEffect
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 double WahWowAudioProcessor::getTailLengthSeconds() const
@@ -59,8 +58,8 @@ double WahWowAudioProcessor::getTailLengthSeconds() const
 
 int WahWowAudioProcessor::getNumPrograms()
 {
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
+    return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+              // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int WahWowAudioProcessor::getCurrentProgram()
@@ -68,27 +67,27 @@ int WahWowAudioProcessor::getCurrentProgram()
     return 0;
 }
 
-void WahWowAudioProcessor::setCurrentProgram (int index)
+void WahWowAudioProcessor::setCurrentProgram(int index)
 {
-    ignoreUnused (index);
+    ignoreUnused(index);
 }
 
-const String WahWowAudioProcessor::getProgramName (int index)
+const String WahWowAudioProcessor::getProgramName(int index)
 {
-    ignoreUnused (index);
+    ignoreUnused(index);
     return {};
 }
 
-void WahWowAudioProcessor::changeProgramName (int index, const String& newName)
+void WahWowAudioProcessor::changeProgramName(int index, const String &newName)
 {
-    ignoreUnused (index, newName);
+    ignoreUnused(index, newName);
 }
 
 //==============================================================================
-void WahWowAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void WahWowAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     dsp::ProcessSpec spec;
-    spec.sampleRate = sampleRate; 
+    spec.sampleRate = sampleRate;
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = 1;
 
@@ -106,34 +105,33 @@ void WahWowAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-bool WahWowAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool WahWowAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
 {
-  #if JucePlugin_IsMidiEffect
-    ignoreUnused (layouts);
+#if JucePlugin_IsMidiEffect
+    ignoreUnused(layouts);
     return true;
-  #else
+#else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
     // Some plugin hosts, such as certain GarageBand versions, will only
     // load plugins that support stereo bus layouts.
-    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
+    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono() && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
         return false;
 
-    // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
+        // This checks if the input layout matches the output layout
+#if !JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
-   #endif
+#endif
 
     return true;
-  #endif
+#endif
 }
 
-void WahWowAudioProcessor::processBlock (AudioBuffer<float>& buffer,
-                                              MidiBuffer& midiMessages)
+void WahWowAudioProcessor::processBlock(AudioBuffer<float> &buffer,
+                                        MidiBuffer &midiMessages)
 {
-    ignoreUnused (midiMessages);
+    ignoreUnused(midiMessages);
     ScopedNoDenormals noDenormals;
 
     updateParameters();
@@ -141,16 +139,16 @@ void WahWowAudioProcessor::processBlock (AudioBuffer<float>& buffer,
     auto nSamples = buffer.getNumSamples();
 
     AudioBuffer<float> monnoBuffer;
-    
+
     monnoBuffer.setSize(1, nSamples);
     monnoBuffer.clear();
     monnoBuffer.addFrom(0, 0, buffer, 1, 0, nSamples, 0.5f);
     monnoBuffer.addFrom(0, 0, buffer, 0, 0, nSamples, 0.5f);
 
-    dsp::AudioBlock<float> block {monnoBuffer};
-    
+    dsp::AudioBlock<float> block{monnoBuffer};
+
     effectChain.process(dsp::ProcessContextReplacing<float>(block));
-    
+
     rmsdB.skip(nSamples);
     {
         const auto value = Decibels::gainToDecibels(buffer.getRMSLevel(0, 0, nSamples));
@@ -159,9 +157,9 @@ void WahWowAudioProcessor::processBlock (AudioBuffer<float>& buffer,
         else
             rmsdB.setCurrentAndTargetValue(value);
     }
-    
-    buffer.copyFrom(0,0,monnoBuffer,0,0,nSamples);
-    buffer.copyFrom(1,0,monnoBuffer,0,0,nSamples);
+
+    buffer.copyFrom(0, 0, monnoBuffer, 0, 0, nSamples);
+    buffer.copyFrom(1, 0, monnoBuffer, 0, 0, nSamples);
 }
 
 //==============================================================================
@@ -170,20 +168,20 @@ bool WahWowAudioProcessor::hasEditor() const
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* WahWowAudioProcessor::createEditor()
+AudioProcessorEditor *WahWowAudioProcessor::createEditor()
 {
-    return new WrappedEditor (*this);
+    return new WrappedEditor(*this);
     // return new GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
-void WahWowAudioProcessor::getStateInformation (MemoryBlock& destData)
+void WahWowAudioProcessor::getStateInformation(MemoryBlock &destData)
 {
     MemoryOutputStream mos(destData, true);
     apvts.state.writeToStream(mos);
 }
 
-void WahWowAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void WahWowAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
     auto tree = ValueTree::readFromData(data, sizeInBytes);
     if (tree.isValid())
@@ -192,7 +190,6 @@ void WahWowAudioProcessor::setStateInformation (const void* data, int sizeInByte
         updateParameters();
     }
 }
-
 
 ChainSettings getChainSettings(AudioProcessorValueTreeState &apvts)
 {
@@ -213,36 +210,35 @@ AudioProcessorValueTreeState::ParameterLayout WahWowAudioProcessor::createParame
     AudioProcessorValueTreeState::ParameterLayout layout;
 
     layout.add(std::make_unique<AudioParameterFloat>("Output Level",
-                                                           "Output Level",
-                                                           NormalisableRange<float>(-48.0f, 24.0f, 0.1f, 1.0f),
-                                                           0.0f));
+                                                     "Output Level",
+                                                     NormalisableRange<float>(-48.0f, 24.0f, 0.1f, 1.0f),
+                                                     0.0f));
 
     layout.add(std::make_unique<AudioParameterFloat>("Wah Frequency",
-                                                           "Wah Frequency",
-                                                           NormalisableRange<float>(0.0f, 1.0f, 0.01f, 1.0f),
-                                                           0.0f));
+                                                     "Wah Frequency",
+                                                     NormalisableRange<float>(0.0f, 1.0f, 0.01f, 1.0f),
+                                                     0.0f));
 
     layout.add(std::make_unique<AudioParameterFloat>("Wild",
-                                                            "Wild",
-                                                            NormalisableRange<float>(0.0f, 1.0f, 0.01f, 1.0f),
-                                                            0.5f));
+                                                     "Wild",
+                                                     NormalisableRange<float>(0.0f, 1.0f, 0.01f, 1.0f),
+                                                     0.5f));
 
     layout.add(std::make_unique<AudioParameterFloat>("Q",
-                                                            "Q",
-                                                            NormalisableRange<float>(3.0f, 9.0f, 0.01f, 1.0f),
-                                                            6.0f));
+                                                     "Q",
+                                                     NormalisableRange<float>(3.0f, 9.0f, 0.01f, 1.0f),
+                                                     6.0f));
 
     layout.add(std::make_unique<AudioParameterBool>("Auto",
-                                                          "Auto",
-                                                          false));
+                                                    "Auto",
+                                                    false));
 
     layout.add(std::make_unique<AudioParameterBool>("Bypass",
-                                                          "Bypass",
-                                                          false));
+                                                    "Bypass",
+                                                    false));
 
     return layout;
 }
-
 
 void WahWowAudioProcessor::updateParameters()
 {
@@ -265,17 +261,17 @@ void WahWowAudioProcessor::updateWah(const ChainSettings &chainSettings)
 {
     auto &wahFilter = effectChain.get<ChainPositions::wahFilter>();
 
-    auto focusRate = 1.0f-chainSettings.wild;
-    auto minFreq = (max_lowfreq - min_lowfreq)*focusRate + min_lowfreq;
-    auto maxFreq = (max_highfreq - min_highfreq)*(1.0f-focusRate) + min_highfreq;
+    auto focusRate = 1.0f - chainSettings.wild;
+    auto minFreq = (max_lowfreq - min_lowfreq) * focusRate + min_lowfreq;
+    auto maxFreq = (max_highfreq - min_highfreq) * (1.0f - focusRate) + min_highfreq;
 
     wahFilter.setAuto(chainSettings.isAuto);
     wahFilter.setMaxFreq(maxFreq);
     wahFilter.setMinFreq(minFreq);
     wahFilter.setQvalue(chainSettings.qValue);
     wahFilter.setSensitivity(chainSettings.qValue / 20.0f);
-    
-    if(chainSettings.isAuto)
+
+    if (chainSettings.isAuto)
         apvts.getParameter("Wah Frequency")->setValueNotifyingHost(wahFilter.getWahPosition());
     else
         wahFilter.setWahFreqRatio(chainSettings.wahRatio);
@@ -288,7 +284,7 @@ float WahWowAudioProcessor::getRmsValue()
 
 //==============================================================================
 // This creates new instances of the plugin..
-AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
     return new WahWowAudioProcessor();
 }

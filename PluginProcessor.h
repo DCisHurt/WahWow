@@ -4,7 +4,6 @@
 #include "WahFilter.h"
 //==============================================================================
 
-
 struct ChainSettings
 {
     float outputGain{0}, wahRatio{0.5}, wild{0.5}, qValue{4};
@@ -13,7 +12,7 @@ struct ChainSettings
 
 ChainSettings getChainSettings(AudioProcessorValueTreeState &apvts);
 
-class WahWowAudioProcessor  : public AudioProcessor
+class WahWowAudioProcessor : public AudioProcessor
 {
 public:
     //==============================================================================
@@ -21,16 +20,16 @@ public:
     ~WahWowAudioProcessor() override;
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
+    bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
 
-    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
+    void processBlock(AudioBuffer<float> &, MidiBuffer &) override;
     using AudioProcessor::processBlock;
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() override;
+    AudioProcessorEditor *createEditor() override;
     bool hasEditor() const override;
 
     //==============================================================================
@@ -44,13 +43,13 @@ public:
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const String getProgramName (int index) override;
-    void changeProgramName (int index, const String& newName) override;
+    void setCurrentProgram(int index) override;
+    const String getProgramName(int index) override;
+    void changeProgramName(int index, const String &newName) override;
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
+    void getStateInformation(MemoryBlock &destData) override;
+    void setStateInformation(const void *data, int sizeInBytes) override;
     //==============================================================================
     float getRmsValue();
     //==============================================================================
@@ -61,7 +60,6 @@ public:
     using Filter = WahFilter<float>;
     using Gain = dsp::Gain<float>;
     using MonoChain = dsp::ProcessorChain<Filter, Gain>;
-    
 
     MonoChain effectChain;
 
@@ -70,6 +68,7 @@ public:
         wahFilter,
         outputGain
     };
+
 private:
     void updateWah(const ChainSettings &chainSettings);
     void updateGain(const ChainSettings &chainSettings);
@@ -77,8 +76,8 @@ private:
 
     LinearSmoothedValue<float> rmsdB;
 
-    float min_lowfreq=150.0f, max_lowfreq=400.0f, min_highfreq=1500.0f, max_highfreq=2700.0f;
+    float min_lowfreq = 150.0f, max_lowfreq = 400.0f, min_highfreq = 1500.0f, max_highfreq = 2700.0f;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WahWowAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WahWowAudioProcessor)
 };
