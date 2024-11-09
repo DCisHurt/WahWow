@@ -42,6 +42,8 @@ XYPad::XYPad(AudioProcessorValueTreeState &stateToUse, const String &xID, const 
         xVal.setValue(jmap(position.getX(), 0.0, bounds.getWidth() - w, xVal.getMinimum(), xVal.getMaximum()));
         yVal.setValue(jmap(position.getY(), bounds.getHeight() - w, 0.0, yVal.getMinimum(), yVal.getMaximum()));
     };
+    xVal.onValueChange = [this] { valueChanged();};
+    yVal.onValueChange = [this] { valueChanged();};
 }
 
 void XYPad::resized()

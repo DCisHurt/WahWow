@@ -4,6 +4,7 @@
 //==============================================================================
 WahWowAudioProcessorEditor::WahWowAudioProcessorEditor(WahWowAudioProcessor &p)
     : processorRef(p),
+      presetPanel(p.getPresetManager()),
       outputGainAth{p.apvts, "Output Level", outputGain},
       wahPositionAth{p.apvts, "Wah Frequency", wahPosition},
       isAutoAth{p.apvts, "Auto", isAuto},
@@ -21,8 +22,9 @@ WahWowAudioProcessorEditor::WahWowAudioProcessorEditor(WahWowAudioProcessor &p)
     addAndMakeVisible(isBypassed);
     addAndMakeVisible(xyPad);
     addAndMakeVisible(wahFilter.viewer);
-    addAndMakeVisible(presetL);
-    addAndMakeVisible(presetR);
+    // addAndMakeVisible(presetL);
+    // addAndMakeVisible(presetR);
+    addAndMakeVisible(presetPanel);
 
     outputGain.setSliderStyle(Slider::SliderStyle::LinearVertical);
     wahPosition.setSliderStyle(Slider::SliderStyle::LinearVertical);
@@ -58,13 +60,12 @@ void WahWowAudioProcessorEditor::resized()
     auto &wahFilter = processorRef.effectChain.get<processorRef.ChainPositions::wahFilter>();
 
     isBypassed.setBounds(1265, 876, 155, 65);
-    xyPad.setBounds(141, 322, 540, 540);
+    xyPad.setBounds(141, 360, 540, 540);
     wahPosition.setBounds(972, 358, 53, 470);
     isAuto.setBounds(921, 876, 155, 65);
     outputGain.setBounds(1316, 358, 53, 470);
-    presetL.setBounds(1310, 176, 62, 68);
-    presetR.setBounds(1420, 176, 62, 68);
-    wahFilter.viewer.setBounds(141, 922, 540, 65);
+    presetPanel.setBounds(1160, 60, 350, 200);
+    wahFilter.viewer.setBounds(141, 922, 480, 65);
 }
 
 WrappedEditor::WrappedEditor(WahWowAudioProcessor &p) : AudioProcessorEditor(p),

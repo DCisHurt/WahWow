@@ -1,16 +1,10 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "WahFilter.h"
+#include "DSP/WahFilter.h"
+#include "Utility/Parameter.h"
+#include "Utility/PresetManager.h"
 //==============================================================================
-
-struct ChainSettings
-{
-    float outputGain{0}, wahRatio{0.5}, wild{0.5}, qValue{4};
-    bool isBypassed{0}, isAuto{0};
-};
-
-ChainSettings getChainSettings(AudioProcessorValueTreeState &apvts);
 
 class WahWowAudioProcessor : public AudioProcessor
 {
@@ -54,8 +48,9 @@ public:
     float getRmsValue();
     //==============================================================================
 
-    static AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-    AudioProcessorValueTreeState apvts{*this, nullptr, "Parameters", createParameterLayout()};
+    using PM = Service::ParameterManager;
+
+    AudioProcessorValueTreeState apvts{*this, nullptr, "Parameters", PM::createParameterLayout()};
 
     using Filter = WahFilter<float>;
     using Gain = dsp::Gain<float>;
@@ -69,11 +64,14 @@ public:
         outputGain
     };
 
-private:
-    void updateWah(const ChainSettings &chainSettings);
-    void updateGain(const ChainSettings &chainSettings);
-    void updateParameters();
+    Service::PresetManager &getPresetManager() { return *presetManager; }
 
+private:
+    std::unique_ptr<Service::PresetManager> presetManager;
+    
+    void updateWah(const PM::Parameters &settings);
+    void updateGain(const PM::Parameters &settings);
+    void updateParameters();
     LinearSmoothedValue<float> rmsdB;
 
     float min_lowfreq = 150.0f, max_lowfreq = 400.0f, min_highfreq = 1500.0f, max_highfreq = 2700.0f;

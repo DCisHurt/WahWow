@@ -30,7 +30,7 @@ private:
 
     Slider xVal, yVal;
     AudioProcessorValueTreeState::SliderAttachment xAth, yAth;
-
+    
     Thumb thumb;
     Image background;
     static constexpr int thumbSize = 61;

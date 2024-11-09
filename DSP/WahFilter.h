@@ -86,8 +86,6 @@ private:
     EnvelopeFollower<SampleType> envelopeFilter;
     float d;
 
-    int count = 0;
-
     double sampleRate = 44100.0;
     bool isAuto = false;
     SampleType minFreq = 200.0, maxFreq = 2000.0, qValue = 5.0, wahFreqRatio = 0.5;

@@ -12,6 +12,7 @@ WahWowAudioProcessor::WahWowAudioProcessor()
 #endif
       )
 {
+    presetManager = std::make_unique<Service::PresetManager>(apvts);
 }
 
 WahWowAudioProcessor::~WahWowAudioProcessor()
@@ -118,7 +119,7 @@ bool WahWowAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) co
     if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono() && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
         return false;
 
-        // This checks if the input layout matches the output layout
+    // This checks if the input layout matches the output layout
 #if !JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
@@ -191,90 +192,42 @@ void WahWowAudioProcessor::setStateInformation(const void *data, int sizeInBytes
     }
 }
 
-ChainSettings getChainSettings(AudioProcessorValueTreeState &apvts)
-{
-    ChainSettings settings;
-
-    settings.outputGain = apvts.getRawParameterValue("Output Level")->load();
-    settings.wild = apvts.getRawParameterValue("Wild")->load();
-    settings.qValue = apvts.getRawParameterValue("Q")->load();
-    settings.wahRatio = apvts.getRawParameterValue("Wah Frequency")->load();
-    settings.isAuto = apvts.getParameter("Auto")->getValue();
-    settings.isBypassed = apvts.getParameter("Bypass")->getValue();
-
-    return settings;
-}
-
-AudioProcessorValueTreeState::ParameterLayout WahWowAudioProcessor::createParameterLayout()
-{
-    AudioProcessorValueTreeState::ParameterLayout layout;
-
-    layout.add(std::make_unique<AudioParameterFloat>("Output Level",
-                                                     "Output Level",
-                                                     NormalisableRange<float>(-48.0f, 24.0f, 0.1f, 1.0f),
-                                                     0.0f));
-
-    layout.add(std::make_unique<AudioParameterFloat>("Wah Frequency",
-                                                     "Wah Frequency",
-                                                     NormalisableRange<float>(0.0f, 1.0f, 0.01f, 1.0f),
-                                                     0.0f));
-
-    layout.add(std::make_unique<AudioParameterFloat>("Wild",
-                                                     "Wild",
-                                                     NormalisableRange<float>(0.0f, 1.0f, 0.01f, 1.0f),
-                                                     0.5f));
-
-    layout.add(std::make_unique<AudioParameterFloat>("Q",
-                                                     "Q",
-                                                     NormalisableRange<float>(3.0f, 9.0f, 0.01f, 1.0f),
-                                                     6.0f));
-
-    layout.add(std::make_unique<AudioParameterBool>("Auto",
-                                                    "Auto",
-                                                    false));
-
-    layout.add(std::make_unique<AudioParameterBool>("Bypass",
-                                                    "Bypass",
-                                                    false));
-
-    return layout;
-}
-
 void WahWowAudioProcessor::updateParameters()
 {
-    auto chainSettings = getChainSettings(apvts);
+    PM temp;
+    PM::Parameters settings = temp.getParameters(apvts);
 
-    effectChain.setBypassed<0>(chainSettings.isBypassed);
-    effectChain.setBypassed<1>(chainSettings.isBypassed);
+    effectChain.setBypassed<0>(settings.isBypassed);
+    effectChain.setBypassed<1>(settings.isBypassed);
 
-    updateWah(chainSettings);
-    updateGain(chainSettings);
+    updateWah(settings);
+    updateGain(settings);
 }
 
-void WahWowAudioProcessor::updateGain(const ChainSettings &chainSettings)
+void WahWowAudioProcessor::updateGain(const PM::Parameters &settings)
 {
     auto &gainOut = effectChain.get<ChainPositions::outputGain>();
-    gainOut.setGainDecibels(chainSettings.outputGain);
+    gainOut.setGainDecibels(settings.outputGain);
 }
 
-void WahWowAudioProcessor::updateWah(const ChainSettings &chainSettings)
+void WahWowAudioProcessor::updateWah(const PM::Parameters &settings)
 {
     auto &wahFilter = effectChain.get<ChainPositions::wahFilter>();
 
-    auto focusRate = 1.0f - chainSettings.wild;
+    auto focusRate = 1.0f - settings.wild;
     auto minFreq = (max_lowfreq - min_lowfreq) * focusRate + min_lowfreq;
     auto maxFreq = (max_highfreq - min_highfreq) * (1.0f - focusRate) + min_highfreq;
 
-    wahFilter.setAuto(chainSettings.isAuto);
+    wahFilter.setAuto(settings.isAuto);
     wahFilter.setMaxFreq(maxFreq);
     wahFilter.setMinFreq(minFreq);
-    wahFilter.setQvalue(chainSettings.qValue);
-    wahFilter.setSensitivity(chainSettings.qValue / 20.0f);
+    wahFilter.setQvalue(settings.qValue);
+    wahFilter.setSensitivity(settings.qValue / 20.0f);
 
-    if (chainSettings.isAuto)
+    if (settings.isAuto)
         apvts.getParameter("Wah Frequency")->setValueNotifyingHost(wahFilter.getWahPosition());
     else
-        wahFilter.setWahFreqRatio(chainSettings.wahRatio);
+        wahFilter.setWahFreqRatio(settings.wahRatio);
 }
 
 float WahWowAudioProcessor::getRmsValue()

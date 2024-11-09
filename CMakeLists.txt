@@ -72,10 +72,11 @@ target_sources(${PROJECT_NAME}
     PRIVATE
         PluginEditor.cpp
         PluginProcessor.cpp
-        XYPad.cpp
-        WahFilter.cpp
-        EnvelopeFollower.cpp
-        PresetManager.cpp
+        Component/XYPad.cpp
+        DSP/WahFilter.cpp
+        DSP/EnvelopeFollower.cpp
+        Utility/Parameter.cpp
+        Utility/PresetManager.cpp
         ${AssetFiles})
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer

@@ -1,10 +1,12 @@
 #pragma once
 
 #include "PluginProcessor.h"
-#include "XYPad.h"
-#include "MyTextButton.h"
-#include "MyPowerButton.h"
-#include "MyArrowButton.h"
+#include "Component/XYPad.h"
+#include "Component/MyTextButton.h"
+#include "Component/MyPowerButton.h"
+#include "Component/MyArrowButton.h"
+#include "Component/PresetPanel.h"
+
 
 //==============================================================================
 class WahWowAudioProcessorEditor : public Component, public Timer
@@ -22,7 +24,7 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     WahWowAudioProcessor &processorRef;
-
+    Gui::PresetPanel presetPanel;
     Image background;
 
     Slider outputGain = Slider(" dB");
@@ -36,9 +38,6 @@ private:
     const String title = "Cab Impulse";
 
     Label MyLabel = Label(title, title);
-
-    MyArrowButton presetL = MyArrowButton("Preset L", ImageCache::getFromMemory(BinaryData::ttt_png, BinaryData::ttt_pngSize));
-    MyArrowButton presetR = MyArrowButton("Preset R", ImageCache::getFromMemory(BinaryData::ttt_png, BinaryData::ttt_pngSize));
 
     AudioProcessorValueTreeState::SliderAttachment outputGainAth, wahPositionAth;
 
