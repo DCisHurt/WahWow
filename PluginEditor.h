@@ -6,7 +6,7 @@
 #include "Component/MyPowerButton.h"
 #include "Component/MyArrowButton.h"
 #include "Component/PresetPanel.h"
-
+#include "Component/MySlider.h"
 
 //==============================================================================
 class WahWowAudioProcessorEditor : public Component, public Timer
@@ -27,8 +27,8 @@ private:
     Gui::PresetPanel presetPanel;
     Image background;
 
-    Slider outputGain = Slider(" dB");
-    Slider wahPosition = Slider();
+    MySlider outputGain = MySlider("dB");
+    MySlider wahPosition = MySlider("wah");
 
     XYPad xyPad;
 
