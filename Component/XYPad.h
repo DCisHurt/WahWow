@@ -33,7 +33,7 @@ private:
     
     Thumb thumb;
     Image background;
-    static constexpr int thumbSize = 61;
-
+    static constexpr int thumbW = 105;
+    static constexpr int thumbH = 96;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(XYPad)
 };

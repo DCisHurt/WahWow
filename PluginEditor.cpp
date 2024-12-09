@@ -15,15 +15,11 @@ WahWowAudioProcessorEditor::WahWowAudioProcessorEditor(WahWowAudioProcessor &p)
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
-    auto &wahFilter = p.effectChain.get<p.ChainPositions::wahFilter>();
     addAndMakeVisible(outputGain);
     addAndMakeVisible(wahPosition);
     addAndMakeVisible(isAuto);
     addAndMakeVisible(isBypassed);
     addAndMakeVisible(xyPad);
-    addAndMakeVisible(wahFilter.viewer);
-    // addAndMakeVisible(presetL);
-    // addAndMakeVisible(presetR);
     addAndMakeVisible(presetPanel);
 
     outputGain.setSliderStyle(Slider::SliderStyle::LinearVertical);
@@ -32,7 +28,6 @@ WahWowAudioProcessorEditor::WahWowAudioProcessorEditor(WahWowAudioProcessor &p)
     outputGain.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
 
     startTimerHz(30);
-    wahFilter.viewer.setColours(juce::Colours::black, juce::Colours::whitesmoke);
 }
 
 WahWowAudioProcessorEditor::~WahWowAudioProcessorEditor()
@@ -42,30 +37,22 @@ WahWowAudioProcessorEditor::~WahWowAudioProcessorEditor()
 //==============================================================================
 void WahWowAudioProcessorEditor::timerCallback()
 {
-    DBG(processorRef.getRmsValue());
+    // DBG(processorRef.getRmsValue());
 }
 //==============================================================================
 void WahWowAudioProcessorEditor::paint(juce::Graphics &g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    background = ImageCache::getFromMemory(BinaryData::background_png, BinaryData::background_pngSize);
-    g.drawImageAt(background, 0, 0);
-    // g.fillAll(juce::Colour(0xFF2C2C2C));
-    // g.setColour(juce::Colour(0xFFC3C3C3));
-    // g.setFont(12.0f);
+    g.drawImage(ImageCache::getFromMemory(BinaryData::background_png, BinaryData::background_pngSize), getLocalBounds().toFloat());
 }
 
 void WahWowAudioProcessorEditor::resized()
 {
-    auto &wahFilter = processorRef.effectChain.get<processorRef.ChainPositions::wahFilter>();
-
-    isBypassed.setBounds(1265, 876, 155, 65);
+    isBypassed.setBounds(1280, 850, 125, 68);
     xyPad.setBounds(141, 360, 540, 540);
     wahPosition.setBounds(972, 358, 53, 470);
-    isAuto.setBounds(921, 876, 155, 65);
+    isAuto.setBounds(936, 850, 125, 68);
     outputGain.setBounds(1316, 358, 53, 470);
-    presetPanel.setBounds(1160, 60, 350, 200);
-    wahFilter.viewer.setBounds(141, 922, 480, 65);
+    presetPanel.setBounds(1160, 75, 350, 180);
 }
 
 WrappedEditor::WrappedEditor(WahWowAudioProcessor &p) : AudioProcessorEditor(p),

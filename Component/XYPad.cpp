@@ -5,7 +5,7 @@
  */
 XYPad::Thumb::Thumb()
 {
-    constrainer.setMinimumOnscreenAmounts(thumbSize, thumbSize, thumbSize, thumbSize);
+    constrainer.setMinimumOnscreenAmounts(thumbW, thumbW, thumbW, thumbW);
 }
 
 void XYPad::Thumb::paint(Graphics &g)
@@ -37,7 +37,7 @@ XYPad::XYPad(AudioProcessorValueTreeState &stateToUse, const String &xID, const 
     thumb.moveCallback = [&](Point<double> position)
     {
         const auto bounds = getLocalBounds().toDouble();
-        const auto w = static_cast<double>(thumbSize);
+        const auto w = static_cast<double>(thumbW);
 
         xVal.setValue(jmap(position.getX(), 0.0, bounds.getWidth() - w, xVal.getMinimum(), xVal.getMaximum()));
         yVal.setValue(jmap(position.getY(), bounds.getHeight() - w, 0.0, yVal.getMinimum(), yVal.getMaximum()));
@@ -48,11 +48,11 @@ XYPad::XYPad(AudioProcessorValueTreeState &stateToUse, const String &xID, const 
 
 void XYPad::resized()
 {
-    thumb.setBounds(getLocalBounds().withSize(thumbSize, 52));
+    thumb.setBounds(getLocalBounds().withSize(thumbW, thumbH));
     valueChanged();
 }
 
-void XYPad::paint(Graphics &g)
+void XYPad::paint(Graphics &)
 {
     // g.setColour(Colours::black);
     // g.fillRoundedRectangle(getLocalBounds().toFloat(), 10.f);
@@ -70,7 +70,7 @@ void XYPad::valueChanged()
 
     // Figure out if the slider belongs to xVals or yVals
     const auto bounds = getLocalBounds().toDouble();
-    const auto w = static_cast<double>(thumbSize);
+    const auto w = static_cast<double>(thumbW);
 
     thumb.setTopLeftPosition(
         static_cast<int>(jmap(xVal.getValue(), xVal.getMinimum(), xVal.getMaximum(), 0.0, bounds.getWidth() - w)),

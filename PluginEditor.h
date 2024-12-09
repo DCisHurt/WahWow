@@ -2,12 +2,11 @@
 
 #include "PluginProcessor.h"
 #include "Component/XYPad.h"
-#include "Component/MyTextButton.h"
+#include "Component/MyImageButton.h"
 #include "Component/MyPowerButton.h"
 #include "Component/MyArrowButton.h"
 #include "Component/PresetPanel.h"
 #include "Component/MySlider.h"
-
 //==============================================================================
 class WahWowAudioProcessorEditor : public Component, public Timer
 {
@@ -30,19 +29,14 @@ private:
     MySlider outputGain = MySlider("dB");
     MySlider wahPosition = MySlider("wah");
 
-    XYPad xyPad;
+    XYPad xyPad; 
 
-    MyTextButton isAuto = MyTextButton("Auto");
-    MyPowerButton isBypassed = MyPowerButton();
-
-    const String title = "Cab Impulse";
-
-    Label MyLabel = Label(title, title);
+    MyImageButton isAuto = MyImageButton("Auto", ImageCache::getFromMemory(BinaryData::auto_button_png, BinaryData::auto_button_pngSize));
+    MyImageButton isBypassed = MyImageButton("Bypass", ImageCache::getFromMemory(BinaryData::bypass_button_png, BinaryData::bypass_button_pngSize));
 
     AudioProcessorValueTreeState::SliderAttachment outputGainAth, wahPositionAth;
 
     AudioProcessorValueTreeState::ButtonAttachment isAutoAth, isBypassedAth;
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WahWowAudioProcessorEditor);
 };
 

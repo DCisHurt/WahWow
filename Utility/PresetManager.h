@@ -19,9 +19,10 @@ namespace Service
 		AudioProcessorValueTreeState &valueTreeState;
 		int currentPresetIndex = 0;
 		const StringArray presetName = {
-			"A",
-			"B",
-			"Wild"};
+			"Juicy",
+			"Wild",
+			"QBay",
+			"Tight"};
 
 		const StringArray parameters = {
 			"Output Level",
